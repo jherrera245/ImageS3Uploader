@@ -1,0 +1,79 @@
+﻿@{
+    ViewData["Title"] = "Uploader";
+}
+
+<div class="row">
+    <div class="col-12 mt-3">
+        <div class="text-center">
+            <h1 class="display-4">Uploader Images</h1>
+        </div>
+    </div>
+
+    <div class="col-lg-6 col-sm-12 m-auto">
+
+        <div class="row mt-3 mb-3">
+            <div class="col-12 m-auto">
+                <div id="imagePreview" class="image-preview rounded">
+                    Vista previa de la imagen
+                </div>
+                <div id="spinner" class="d-none text-center mt-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form action="/" method="post">
+            <div class="row">
+                <div class="col-12">
+                    <input class="form-control form-control-dark" type="file" id="inputImage" accept="image/*" />
+                </div>
+                <div class=""></div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $('#inputImage').on('change', function (event) {
+            const input = event.target;
+            const preview = $('#imagePreview');
+            const spinner = $('#spinner');
+            const file = input.files[0];
+            const validImageTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/svg+xml', 'image/webp'];
+
+            if (file && validImageTypes.includes(file.type)) {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                // Mostrar spinner mientras se espera la respuesta de la API
+                spinner.removeClass('d-none');
+
+                $.ajax({
+                    url: 'URL_DE_TU_API',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        const imageUrl = response.imageUrl;
+                        const img = $('<img>').attr('src', imageUrl);
+                        preview.empty().append(img);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error al adjuntar la imagen:', error);
+                        preview.html('Error al adjuntar la imagen');
+                    },
+                    complete: function () {
+                        // Ocultar spinner cuando la solicitud se completa (ya sea éxito o error)
+                        spinner.addClass('d-none');
+                    }
+                });
+            } else {
+                preview.html('Por favor, seleccione un archivo de imagen válido.');
+            }
+        });
+    </script>
+}
